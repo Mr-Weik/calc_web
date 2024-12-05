@@ -5,172 +5,187 @@ import re  # 引入正则表达式库
 app = Flask(__name__)
 
 # HTML 模板
-html_template ="""
- <!doctype html>
+html_template = """<!doctype html>
 <html lang="zh">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>多行加法计算器</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-        <style>
-            body {
-                padding: 20px;
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                background-color: #f1f3f5;
-            }
-            textarea {
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>多行加法计算器</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f1f3f5;
+        }
+        textarea {
+            width: 100%;
+            resize: none;
+        }
+        .card {
+            margin-top: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .result-box {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .copy-button {
+            cursor: pointer;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 16px;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        .copy-button:hover {
+            background-color: #218838;
+        }
+        .form-control, button {
+            font-size: 1.2rem;
+        }
+        .result-header {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        .step-item {
+            font-size: 1.2rem;
+            padding: 10px;
+            border-radius: 5px;
+            margin-right: 10px;
+            background-color: #e9ecef;
+            transition: background-color 0.3s;
+        }
+        .step-item:hover {
+            background-color: #f8f9fa;
+        }
+        .final-result {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #007bff;
+            margin-top: 20px;
+        }
+        .alert {
+            color: #fff;
+            background-color: #f44336;
+            border-radius: 5px;
+            padding: 10px;
+            margin-top: 20px;
+        }
+        /* 针对小屏幕的优化 */
+        @media (max-width: 576px) {
+            .copy-button {
                 width: 100%;
-                resize: none;
-            }
-            .card {
-                margin-top: 20px;
-                border-radius: 10px;
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                margin-top: 10px;
             }
             .result-box {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-            }
-            .copy-button {
-                cursor: pointer;
-                background-color: #28a745;
-                color: white;
-                border: none;
-                border-radius: 5px;
-                padding: 8px 16px;
-                font-size: 14px;
-                transition: background-color 0.3s;
-            }
-            .copy-button:hover {
-                background-color: #218838;
-            }
-            .form-control, button {
-                font-size: 1.2rem;
-            }
-            .result-header {
-                font-size: 1.5rem;
-                font-weight: bold;
-                color: #333;
-                margin-bottom: 15px;
+                flex-direction: column;
+                align-items: flex-start;
             }
             .step-item {
-                font-size: 1.2rem;
-                padding: 10px;
-                border-radius: 5px;
-                margin-right: 10px;
-                background-color: #e9ecef;
-                transition: background-color 0.3s;
+                margin-right: 0;
+                margin-bottom: 10px;
             }
-            .step-item:hover {
-                background-color: #f8f9fa;
-            }
-            .final-result {
-                font-size: 1.8rem;
-                font-weight: bold;
-                color: #007bff;
-                margin-top: 20px;
-            }
-            .alert {
-                color: #fff;
-                background-color: #f44336;
-                border-radius: 5px;
-                padding: 10px;
-                margin-top: 20px;
-            }
+        }
+    </style>
+</head>
+<body>
+    <h1 class="text-center mb-4">多行加法计算器</h1>
+    <form method="post">
+        <div class="mb-3">
+            <textarea name="lines" rows="5" class="form-control" placeholder="请输入数字，每行一个数字">{{ lines }}</textarea>
+        </div>
+        <div class="text-center">
+            <button name="operation" value="add" type="submit" class="btn btn-success m-1 btn-lg">计算</button>
+        </div>
+    </form>
 
-            /* 针对小屏幕的优化 */
-            @media (max-width: 576px) {
-                .copy-button {
-                    width: 100%;
-                    margin-top: 10px;
-                }
-                .result-box {
-                    flex-direction: column;
-                    align-items: flex-start;
-                }
-            }
-        </style>
-    </head>
-    <body>
-        <h1 class="text-center mb-4">多行加法计算器</h1>
-        <form method="post">
-            <div class="mb-3">
-                <textarea name="lines" rows="5" class="form-control" placeholder="请输入数字，每行一个数字"></textarea>
+    {% if result is not none %}
+        <div class="card">
+            <div class="result-box p-3">
+                <textarea id="result" class="form-control" rows="3" readonly>{{ result }}</textarea>
+                <button class="copy-button" onclick="copyResult()">复制结果</button>
             </div>
-            <div class="text-center">
-                <button name="operation" value="add" type="submit" class="btn btn-success m-1 btn-lg">计算</button>
-            </div>
-        </form>
+        </div>
+    {% endif %}
 
-        {% if result is not none %}
-            <div class="card">
-                <div class="result-box p-3">
-                    <textarea id="result" class="form-control" rows="3" readonly>{{ result }}</textarea>
-                    <button class="copy-button" onclick="copyResult()">复制结果</button>
+    {% if numbers %}
+        <div class="card">
+            <div class="p-3">
+                <h4 class="result-header">输入的数字：</h4>
+                <div class="d-flex flex-wrap">
+                    {% for number in numbers %}
+                        <div class="step-item">{{ number }}</div>
+                    {% endfor %}
                 </div>
             </div>
-        {% endif %}
+        </div>
+    {% endif %}
 
-        {% if numbers %}
-            <div class="card">
-                <div class="p-3">
-                    <h4 class="result-header">输入的数字：</h4>
-                    <div class="d-flex flex-wrap">
-                        {% for number in numbers %}
-                            <div class="step-item">{{ number }}</div>
-                        {% endfor %}
-                    </div>
+    {% if extracted %}
+        <div class="card">
+            <div class="p-3">
+                <h4 class="result-header">提取结果：</h4>
+                <div class="d-flex flex-wrap">
+                    {% for extract in extracted %}
+                        <div class="step-item">{{ extract }}</div>
+                    {% endfor %}
                 </div>
             </div>
-        {% endif %}
+        </div>
+    {% endif %}
 
-        {% if result is not none %}
-            <div class="card">
-                <div class="p-3">
-                    <h4 class="result-header">计算过程：</h4>
-                    <div>
-                        {% for line in operations %}
-                            <div class="step-item">{{ line }}</div>
-                        {% endfor %}
-                    </div>
-                    <div class="final-result">
-                        最终总和：{{ result }}
-                    </div>
+    {% if operations %}
+        <div class="card">
+            <div class="p-3">
+                <h4 class="result-header">计算过程：</h4>
+                <div>
+                    {% for line in operations %}
+                        <div class="step-item">{{ line }}</div>
+                    {% endfor %}
+                </div>
+                <div class="final-result">
+                    最终总和：{{ result }}
                 </div>
             </div>
-        {% endif %}
+        </div>
+    {% endif %}
 
-        {% if error_message %}
-            <div class="alert">
-                {{ error_message }}
-            </div>
-        {% endif %}
+    {% if error_message %}
+        <div class="alert">
+            {{ error_message }}
+        </div>
+    {% endif %}
 
-        <script>
-            function copyResult() {
-                var resultTextarea = document.getElementById("result");
+    <script>
+        function copyResult() {
+            var resultTextarea = document.getElementById("result");
 
-                // Select the text
-                resultTextarea.select();
-                resultTextarea.setSelectionRange(0, 99999); // For mobile devices
+            // Select the text
+            resultTextarea.select();
+            resultTextarea.setSelectionRange(0, 99999); // For mobile devices
 
-                // Try to copy using the Clipboard API
-                if (navigator.clipboard) {
-                    navigator.clipboard.writeText(resultTextarea.value).then(function() {
-                        alert("结果已复制！");
-                    }).catch(function() {
-                        alert("复制失败，请手动复制");
-                    });
-                } else {
-                    // Fallback for browsers that do not support Clipboard API
-                    document.execCommand("copy");
+            // Try to copy using the Clipboard API
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(resultTextarea.value).then(function() {
                     alert("结果已复制！");
-                }
+                }).catch(function() {
+                    alert("复制失败，请手动复制");
+                });
+            } else {
+                // Fallback for browsers that do not support Clipboard API
+                document.execCommand("copy");
+                alert("结果已复制！");
             }
-        </script>
-    </body>
+        }
+    </script>
+</body>
 </html>
 """
 
@@ -180,16 +195,18 @@ def calculate():
     error_message = None
     numbers = []
     operations = []
+    lines = ""
 
     if request.method == 'POST':
-        lines = request.form['lines'].splitlines()
+        lines = request.form['lines']
+        input_lines = lines.splitlines()
 
-        for line in lines:
+        for line in input_lines:
             if not line.strip():
                 continue  # 跳过空行
 
             # 使用正则表达式去除任何非数字字符，只保留数字
-            match = re.search( r"[^0-9.]+([\d.]+)$", line.strip())  # 匹配行尾的数字部分
+            match = re.search(r"[^0-9.]+([\d.]+)$", line.strip())  # 匹配行尾的数字部分
             if match:
                 num = float(match.group(1))
                 numbers.append(num)
@@ -211,7 +228,7 @@ def calculate():
 
             result = total
 
-    return render_template_string(html_template, result=result, operations=operations, error_message=error_message, numbers=numbers)
+    return render_template_string(html_template, result=result, operations=operations, error_message=error_message, numbers=numbers, lines=lines)
 
 
 if __name__ == '__main__':
