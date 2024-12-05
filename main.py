@@ -215,14 +215,19 @@ def calculate():
             if not line.strip():
                 continue  # 跳过空行
 
-            # 使用正则表达式去除任何非数字字符，只保留数字
-            match = re.search(r"[^0-9.]+([\d.]+)$", line.strip())  # 匹配行尾的数字部分
-            if match:
-                num = float(match.group(1))
+            # 尝试直接将该行转换为 float
+            try:
+                num = float(line.strip())  # 尝试直接转为 float
                 numbers.append(num)
-            else:
-                error_message = "请输入正确的数字，每行一个数字。"
-                break
+            except ValueError:
+                # 如果直接转换失败，再尝试正则匹配
+                match = re.search(r"[^0-9.]*([\d.]+)$", line.strip())  # 匹配行尾的数字部分
+                if match:
+                    num = float(match.group(1))
+                    numbers.append(num)
+                else:
+                    error_message = "请输入正确的数字，每行一个数字。"
+                    break
 
         if error_message is None and numbers:
             total = 0
