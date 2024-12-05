@@ -1,11 +1,12 @@
 # -*- coding: UTF-8 -*-
 from flask import Flask, request, render_template_string
+import re  # 引入正则表达式库
 
 app = Flask(__name__)
 
 # HTML 模板
-html_template = """
-<!doctype html>
+html_template ="""
+ <!doctype html>
 <html lang="zh">
     <head>
         <meta charset="UTF-8">
@@ -57,7 +58,9 @@ html_template = """
             .step-item {
                 font-size: 1.2rem;
                 padding: 10px;
-                border-bottom: 1px solid #ddd;
+                border-radius: 5px;
+                margin-right: 10px;
+                background-color: #e9ecef;
                 transition: background-color 0.3s;
             }
             .step-item:hover {
@@ -106,6 +109,19 @@ html_template = """
                 <div class="result-box p-3">
                     <textarea id="result" class="form-control" rows="3" readonly>{{ result }}</textarea>
                     <button class="copy-button" onclick="copyResult()">复制结果</button>
+                </div>
+            </div>
+        {% endif %}
+
+        {% if numbers %}
+            <div class="card">
+                <div class="p-3">
+                    <h4 class="result-header">输入的数字：</h4>
+                    <div class="d-flex flex-wrap">
+                        {% for number in numbers %}
+                            <div class="step-item">{{ number }}</div>
+                        {% endfor %}
+                    </div>
                 </div>
             </div>
         {% endif %}
@@ -172,10 +188,12 @@ def calculate():
             if not line.strip():
                 continue  # 跳过空行
 
-            try:
-                num = float(line.strip())
+            # 使用正则表达式去除任何非数字字符，只保留数字
+            match = re.search( r"[^0-9.]+([\d.]+)$", line.strip())  # 匹配行尾的数字部分
+            if match:
+                num = float(match.group(1))
                 numbers.append(num)
-            except ValueError:
+            else:
                 error_message = "请输入正确的数字，每行一个数字。"
                 break
 
@@ -193,7 +211,7 @@ def calculate():
 
             result = total
 
-    return render_template_string(html_template, result=result, operations=operations, error_message=error_message)
+    return render_template_string(html_template, result=result, operations=operations, error_message=error_message, numbers=numbers)
 
 
 if __name__ == '__main__':
