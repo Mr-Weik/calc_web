@@ -103,6 +103,7 @@ html_template = """<!doctype html>
         </div>
         <div class="text-center">
             <button name="operation" value="add" type="submit" class="btn btn-success m-1 btn-lg">计算</button>
+            <button type="button" class="btn btn-danger m-1 btn-lg" onclick="clearInput()">清空输入框</button>
         </div>
     </form>
 
@@ -193,9 +194,15 @@ html_template = """<!doctype html>
                 alert("结果已复制！");
             }
         }
+
+        // 清空输入框的 JavaScript 函数
+        function clearInput() {
+            document.querySelector('textarea[name="lines"]').value = '';  // 清空输入框的内容
+        }
     </script>
 </body>
 </html>
+
 """
 
 @app.route('/', methods=['GET', 'POST'])
