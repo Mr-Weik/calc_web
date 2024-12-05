@@ -115,18 +115,27 @@ html_template = """<!doctype html>
         </div>
     {% endif %}
 
-    {% if numbers %}
-        <div class="card">
-            <div class="p-3">
-                <h4 class="result-header">输入的数字：</h4>
-                <div class="d-flex flex-wrap">
-                    {% for number in numbers %}
-                        <div class="step-item">{{ number }}</div>
-                    {% endfor %}
-                </div>
+{% if numbers %}
+    <div class="card">
+        <div class="p-3">
+            <h4 class="result-header">输入的原始数据：</h4>
+            <div class="d-flex flex-wrap">
+                <!-- 显示用户输入的原始数据 -->
+                {% for line in input_lines %}
+                    <div class="step-item">{{ line }}</div>
+                {% endfor %}
+            </div>
+
+            <h4 class="result-header mt-3">提取出的有效数字：</h4>
+            <div class="d-flex flex-wrap">
+                <!-- 显示提取到的数字 -->
+                {% for number in numbers %}
+                    <div class="step-item">{{ number }}</div>
+                {% endfor %}
             </div>
         </div>
-    {% endif %}
+    </div>
+{% endif %}
 
     {% if extracted %}
         <div class="card">
@@ -196,10 +205,11 @@ def calculate():
     numbers = []
     operations = []
     lines = ""
+    input_lines = []  # 存储用户输入的每一行
 
     if request.method == 'POST':
         lines = request.form['lines']
-        input_lines = lines.splitlines()
+        input_lines = lines.splitlines()  # 拆分成多行
 
         for line in input_lines:
             if not line.strip():
@@ -228,7 +238,7 @@ def calculate():
 
             result = total
 
-    return render_template_string(html_template, result=result, operations=operations, error_message=error_message, numbers=numbers, lines=lines)
+    return render_template_string(html_template, result=result, operations=operations, error_message=error_message, numbers=numbers, lines=lines, input_lines=input_lines)
 
 
 if __name__ == '__main__':
