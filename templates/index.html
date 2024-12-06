@@ -1,0 +1,79 @@
+<!-- templates/index.html -->
+<!doctype html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>多行加法计算器</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet">
+</head>
+<body>
+    <h1 class="text-center mb-4">多行加法计算器</h1>
+    <form method="post">
+        <div class="mb-3">
+            <textarea name="lines" rows="5" class="form-control" placeholder="请输入数字，每行一个数字">{{ lines }}</textarea>
+        </div>
+        <div class="text-center">
+            <button name="operation" value="add" type="submit" class="btn btn-success m-1 btn-lg">计算</button>
+            <button type="button" class="btn btn-danger m-1 btn-lg" onclick="clearInput()">清空输入框</button>
+            <a href="{{ url_for('calc_sum') }}" class="btn btn-primary m-1 btn-lg">总记页面</a>
+        </div>
+    </form>
+
+
+
+    {% if result is not none %}
+        <div class="card">
+            <div class="result-box p-3">
+                <textarea id="result" class="form-control" rows="3" readonly>{{ result }}</textarea>
+                <button class="copy-button" onclick="copyResult()">复制结果</button>
+            </div>
+        </div>
+    {% endif %}
+
+    {% if numbers %}
+    <div class="card">
+        <div class="p-3">
+            <h4 class="result-header">输入的原始数据：</h4>
+            <div class="d-flex flex-wrap">
+                {% for line in input_lines %}
+                    <div class="step-item">{{ line }}</div>
+                {% endfor %}
+            </div>
+
+            <h4 class="result-header mt-3">提取出的有效数字：</h4>
+            <div class="d-flex flex-wrap">
+                {% for number in numbers %}
+                    <div class="step-item">{{ number }}</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if operations %}
+    <div class="card">
+        <div class="p-3">
+            <h4 class="result-header">计算过程：</h4>
+            <div>
+                {% for line in operations %}
+                    <div class="step-item">{{ line }}</div>
+                {% endfor %}
+            </div>
+            <div class="final-result">
+                最终总和：{{ result }}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if error_message %}
+        <div class="alert">
+            {{ error_message }}
+        </div>
+    {% endif %}
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

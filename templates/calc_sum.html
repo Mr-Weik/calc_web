@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>计算页面</title>
+    <!-- 引入 Bootstrap 4 样式 -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="{{ url_for('static', filename='css/calc_sum.css') }}" rel="stylesheet">
+</head>
+<body>
+
+<div class="container py-5">
+    <h1 class="text-center mb-4">计算器</h1>
+    <form method="POST">
+        <!-- 输入框区域 -->
+        <div class="form-group">
+            <label for="input_text">输入框（每行格式：文字 数字*数字）:</label>
+            <textarea id="input_text" name="input_text" class="form-control" rows="8" placeholder="请输入数据, 每行格式为: 文字 数字*数字">{{ request.form['input_text'] }}</textarea>
+        </div>
+
+        <!-- 操作按钮 -->
+        <div class="text-center mb-4">
+            <button name="operation" value="add" type="submit" class="btn btn-success m-2 btn-lg w-100 w-md-auto">计算</button>
+            <button type="button" class="btn btn-danger m-2 btn-lg w-100 w-md-auto" onclick="clearInput()">清空输入框</button>
+        </div>
+    </form>
+
+{% if result is not none %}
+<hr>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h3 class="text-center">计算结果</h3>
+            <table class="table table-bordered table-hover">
+                <thead class="thead-light">
+                    <tr>
+                        <th>名称</th>
+                        <th>倍率</th>
+                        <th>符号</th>
+                        <th>组数</th>
+                        <th>结果</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for detail in details %}
+                    <tr>
+                        <td>{{ detail.name }}</td>
+                        <td>{{ detail.num1 }}</td>
+                        <td>{{ detail.operator }}</td>
+                        <td>{{ detail.num2 }}</td>
+                        <td>{{ detail.result }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <h4 class="text-center mt-3">总和: <strong>{{ result }}</strong></h4>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+
+
+
+
+</div>
+
+<!-- 引入 JS 文件 -->
+<script src="{{ url_for('static', filename='js/calc_sum.js') }}"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
