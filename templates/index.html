@@ -9,7 +9,7 @@
     <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet">
 </head>
 <body>
-    <h1 class="text-center mb-4">多行加法计算器</h1>
+    <h1 class="text-center mb-4">多行小数加法计算器</h1>
     <form method="post">
         <div class="mb-3">
             <textarea name="lines" rows="5" class="form-control" placeholder="请输入数字，每行一个数字">{{ lines }}</textarea>
@@ -17,7 +17,7 @@
         <div class="text-center">
             <button name="operation" value="add" type="submit" class="btn btn-success m-1 btn-lg">计算</button>
             <button type="button" class="btn btn-danger m-1 btn-lg" onclick="clearInput()">清空输入框</button>
-            <a href="{{ url_for('calc_sum') }}" class="btn btn-primary m-1 btn-lg">总记页面</a>
+            <a href="{{ url_for('calc_sum') }}" class="btn btn-primary m-1 btn-lg">总记数页</a>
         </div>
     </form>
 
