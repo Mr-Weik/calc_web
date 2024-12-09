@@ -59,7 +59,6 @@ def calculate():
 
 
 @app.route('/calc_sum', methods=['GET', 'POST'])
-@app.route('/calc_sum', methods=['GET', 'POST'])
 def calc_sum():
     result = None
     details = []
@@ -130,6 +129,7 @@ def calc_sum():
 
         result = round(total_sum, 2)  # 最终结果四舍五入到两位小数
 
+    print(f'result: {result}, details: {details}')
     return render_template('calc_sum.html', result=result, details=details)
 
 
